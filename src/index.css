@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  /* Colores */
+  --color-primary: #0E7C86;
+  --color-primary-light: #E1F5EE;
+  --color-accent: #D85A30;
+  --color-background: #FBF9F6;
+  --color-surface: #FFFFFF;
+  --color-text-primary: #2B2A28;
+  --color-text-secondary: #6B6862;
+  --color-border: #E5E1D8;
+  --color-success: #3B8C5A;
+  --color-warning: #C6821F;
+  --color-destructive: #C0392B;
+
+  /* Tipografia */
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Espaciado (base 8px) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radios */
+  --radius-card: 12px;
+  --radius-control: 8px;
+  --radius-fab: 50%;
+
+  /* Transiciones */
+  --transition-default: 200ms ease-out;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
