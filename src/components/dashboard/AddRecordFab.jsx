@@ -29,9 +29,13 @@ export default function AddRecordFab({ onAddSymptom }) {
         <SpeedDialAction
           key={action.key}
           icon={<span style={{ fontSize: 20 }}>{action.icon}</span>}
-          tooltipTitle={action.disabled ? `${action.name} (Próximamente)` : action.name}
-          tooltipOpen
-          FabProps={{ disabled: action.disabled }}
+          slotProps={{
+            tooltip: {
+              title: action.disabled ? `${action.name} (Próximamente)` : action.name,
+              open: true,
+            },
+            fab: { disabled: action.disabled },
+          }}
           onClick={() => handleActionClick(action.key)}
         />
       ))}
