@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -6,6 +6,7 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import { useColorMode } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const links = [
   { to: '/', label: 'Dashboard' },
@@ -16,6 +17,13 @@ const links = [
 
 export default function Navbar() {
   const { mode, toggleColorMode } = useColorMode();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <AppBar position="sticky" color="primary" elevation={0}>
@@ -45,6 +53,12 @@ export default function Navbar() {
         <IconButton color="inherit" onClick={toggleColorMode} aria-label="Cambiar tema">
           <Typography component="span" sx={{ fontSize: 20 }}>
             {mode === 'dark' ? '☀️' : '🌙'}
+          </Typography>
+        </IconButton>
+
+        <IconButton color="inherit" onClick={handleLogout} aria-label="Cerrar sesión">
+          <Typography component="span" sx={{ fontSize: 20 }}>
+            🚪
           </Typography>
         </IconButton>
       </Toolbar>
