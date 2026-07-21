@@ -34,7 +34,7 @@ client.interceptors.response.use(
 
     const { status, data } = error.response;
 
-    if (status === 401) {
+    if (status === 401 && error.config?.headers?.Authorization) {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
       notifySessionExpired('Tu sesión expiró. Inicia sesión de nuevo.');
