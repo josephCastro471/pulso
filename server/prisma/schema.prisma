@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  symptoms     Symptom[]
+  medications  Medication[]
+  appointments Appointment[]
+
+  @@map("users")
+}
+
+model Symptom {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  datetime    DateTime
+  description String
+  intensity   Int
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, datetime])
+  @@map("symptoms")
+}
+
+model Medication {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  dosage    String
+  frequency String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs MedicationLog[]
+
+  @@index([userId])
+  @@map("medications")
+}
+
+model MedicationLog {
+  id           String   @id @default(uuid())
+  medicationId String   @map("medication_id")
+  date         DateTime @db.Date
+  taken        Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  medication Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+
+  @@unique([medicationId, date])
+  @@index([medicationId])
+  @@map("medication_logs")
+}
+
+model Appointment {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  doctor    String
+  specialty String
+  datetime  DateTime
+  location  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, datetime])
+  @@map("appointments")
+}
