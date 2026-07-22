@@ -19,3 +19,12 @@ export async function createMedication(payload) {
   const { data } = await client.post('/medications', payload);
   return data;
 }
+
+export async function updateMedication(id, payload) {
+  const { data } = await client.put(`/medications/${id}`, payload);
+  return data;
+}
+
+export async function deleteMedication(id) {
+  await client.delete(`/medications/${id}`);
+}

@@ -1,5 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { getMedications, getMedicationLogs, upsertMedicationLog, createMedication } from '../api/medications';
+import {
+  getMedications,
+  getMedicationLogs,
+  upsertMedicationLog,
+  createMedication,
+  updateMedication as updateMedicationApi,
+  deleteMedication as deleteMedicationApi,
+} from '../api/medications';
 import { useAuth } from './AuthContext';
 import { useNotification } from './NotificationContext';
 
@@ -58,6 +65,19 @@ export function MedicationsProvider({ children }) {
     setMedications((prev) => [...prev, { ...created, takenToday: false }]);
   };
 
+  const updateMedication = async (id, data) => {
+    const updated = await updateMedicationApi(id, data);
+    setMedications((prev) =>
+      prev.map((m) => (m.id === id ? { ...updated, takenToday: m.takenToday } : m))
+    );
+    return updated;
+  };
+
+  const removeMedication = async (id) => {
+    await deleteMedicationApi(id);
+    setMedications((prev) => prev.filter((m) => m.id !== id));
+  };
+
   const todayAdherence = useMemo(() => {
     if (medications.length === 0) return null;
     const takenCount = medications.filter((med) => med.takenToday).length;
@@ -65,7 +85,15 @@ export function MedicationsProvider({ children }) {
   }, [medications]);
 
   const value = useMemo(
-    () => ({ medications, toggleTaken, addMedication, todayAdherence, loading }),
+    () => ({
+      medications,
+      toggleTaken,
+      addMedication,
+      updateMedication,
+      removeMedication,
+      todayAdherence,
+      loading,
+    }),
     [medications, todayAdherence, loading]
   );
 
