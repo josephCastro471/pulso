@@ -1,44 +1,28 @@
-import { createContext, useContext, useMemo } from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-
-const STORAGE_KEY = 'pulso.appointments';
-
-function createId() {
-  return typeof crypto !== 'undefined' && crypto.randomUUID
-    ? crypto.randomUUID()
-    : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function daysFromNowISO(days, hour) {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  d.setHours(hour, 0, 0, 0);
-  return d.toISOString();
-}
-
-function seedAppointments() {
-  return [
-    {
-      id: createId(),
-      doctor: 'Dra. Elena Ruiz',
-      specialty: 'Medicina general',
-      datetime: daysFromNowISO(-5, 10),
-      location: 'Clínica Central, consultorio 3',
-    },
-    {
-      id: createId(),
-      doctor: 'Dr. Marco Vidal',
-      specialty: 'Cardiología',
-      datetime: daysFromNowISO(9, 16),
-      location: 'Centro Médico Norte, piso 2',
-    },
-  ];
-}
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { getAppointments } from '../api/appointments';
+import { useAuth } from './AuthContext';
+import { useNotification } from './NotificationContext';
 
 const AppointmentsContext = createContext(null);
 
 export function AppointmentsProvider({ children }) {
-  const [appointments] = useLocalStorage(STORAGE_KEY, seedAppointments);
+  const { isAuthenticated } = useAuth();
+  const { notifyError } = useNotification();
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setAppointments([]);
+      return;
+    }
+
+    setLoading(true);
+    getAppointments()
+      .then((res) => setAppointments(res.data))
+      .catch((err) => notifyError(err.message || 'No se pudieron cargar las citas'))
+      .finally(() => setLoading(false));
+  }, [isAuthenticated, notifyError]);
 
   const nextAppointment = useMemo(() => {
     const now = Date.now();
@@ -48,7 +32,10 @@ export function AppointmentsProvider({ children }) {
     return future.length > 0 ? future[0] : null;
   }, [appointments]);
 
-  const value = useMemo(() => ({ appointments, nextAppointment }), [appointments, nextAppointment]);
+  const value = useMemo(
+    () => ({ appointments, nextAppointment, loading }),
+    [appointments, nextAppointment, loading]
+  );
 
   return <AppointmentsContext.Provider value={value}>{children}</AppointmentsContext.Provider>;
 }
