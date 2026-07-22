@@ -1,5 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { getAppointments, createAppointment } from '../api/appointments';
+import {
+  getAppointments,
+  createAppointment,
+  updateAppointment as updateAppointmentApi,
+  deleteAppointment as deleteAppointmentApi,
+} from '../api/appointments';
 import { useAuth } from './AuthContext';
 import { useNotification } from './NotificationContext';
 
@@ -18,7 +23,7 @@ export function AppointmentsProvider({ children }) {
     }
 
     setLoading(true);
-    getAppointments()
+    getAppointments({ limit: 100 })
       .then((res) => setAppointments(res.data))
       .catch((err) => notifyError(err.message || 'No se pudieron cargar las citas'))
       .finally(() => setLoading(false));
@@ -37,8 +42,26 @@ export function AppointmentsProvider({ children }) {
     setAppointments((prev) => [...prev, created]);
   };
 
+  const updateAppointment = async (id, data) => {
+    const updated = await updateAppointmentApi(id, data);
+    setAppointments((prev) => prev.map((a) => (a.id === id ? updated : a)));
+    return updated;
+  };
+
+  const removeAppointment = async (id) => {
+    await deleteAppointmentApi(id);
+    setAppointments((prev) => prev.filter((a) => a.id !== id));
+  };
+
   const value = useMemo(
-    () => ({ appointments, nextAppointment, addAppointment, loading }),
+    () => ({
+      appointments,
+      nextAppointment,
+      addAppointment,
+      updateAppointment,
+      removeAppointment,
+      loading,
+    }),
     [appointments, nextAppointment, loading]
   );
 
