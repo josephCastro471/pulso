@@ -10,6 +10,8 @@ import MedicationsList from '../components/dashboard/MedicationsList';
 import AppointmentsList from '../components/dashboard/AppointmentsList';
 import AddRecordFab from '../components/dashboard/AddRecordFab';
 import SymptomFormModal from '../components/symptoms/SymptomFormModal';
+import MedicationFormModal from '../components/medications/MedicationFormModal';
+import { useAuth } from '../contexts/AuthContext';
 import { useSymptoms } from '../contexts/SymptomsContext';
 import { useMedications } from '../contexts/MedicationsContext';
 import { useAppointments } from '../contexts/AppointmentsContext';
@@ -24,6 +26,8 @@ function formatNextAppointment(appt) {
 
 export default function Dashboard() {
   const [modalOpen, setModalOpen] = useState(false);
+  const [medicationModalOpen, setMedicationModalOpen] = useState(false);
+  const { user } = useAuth();
   const { symptoms, last7Days } = useSymptoms();
   const { todayAdherence } = useMedications();
   const { nextAppointment } = useAppointments();
@@ -35,7 +39,7 @@ export default function Dashboard() {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h1" sx={{ mb: 3 }}>
-        Hola 👋
+        Hola, {user.name} 👋
       </Typography>
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -85,8 +89,15 @@ export default function Dashboard() {
         </Grid>
       </Grid>
 
-      <AddRecordFab onAddSymptom={() => setModalOpen(true)} />
+      <AddRecordFab
+        onAddSymptom={() => setModalOpen(true)}
+        onAddMedication={() => setMedicationModalOpen(true)}
+      />
       <SymptomFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <MedicationFormModal
+        open={medicationModalOpen}
+        onClose={() => setMedicationModalOpen(false)}
+      />
     </Box>
   );
 }
