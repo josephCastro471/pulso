@@ -9,6 +9,7 @@ import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { useSymptoms } from '../../contexts/SymptomsContext';
+import { useNotification } from '../../contexts/NotificationContext';
 
 function nowForInput() {
   const d = new Date();
@@ -21,9 +22,11 @@ const intensityColors = { 1: '#3B8C5A', 2: '#8FB03E', 3: '#C6821F', 4: '#D85A30'
 
 export default function SymptomFormModal({ open, onClose }) {
   const { addSymptom } = useSymptoms();
+  const { notifyError } = useNotification();
   const [datetime, setDatetime] = useState(nowForInput);
   const [description, setDescription] = useState('');
   const [intensity, setIntensity] = useState(3);
+  const [saving, setSaving] = useState(false);
 
   const isValid = description.trim().length > 0 && datetime.length > 0;
 
@@ -34,14 +37,21 @@ export default function SymptomFormModal({ open, onClose }) {
     onClose();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!isValid) return;
-    addSymptom({
-      datetime: new Date(datetime).toISOString(),
-      description: description.trim(),
-      intensity,
-    });
-    handleClose();
+    setSaving(true);
+    try {
+      await addSymptom({
+        datetime: new Date(datetime).toISOString(),
+        description: description.trim(),
+        intensity,
+      });
+      handleClose();
+    } catch (err) {
+      notifyError(err.message || 'No se pudo guardar el síntoma');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -82,8 +92,8 @@ export default function SymptomFormModal({ open, onClose }) {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancelar</Button>
-        <Button onClick={handleSave} variant="contained" disabled={!isValid}>
-          Guardar
+        <Button onClick={handleSave} variant="contained" disabled={!isValid || saving}>
+          {saving ? 'Guardando...' : 'Guardar'}
         </Button>
       </DialogActions>
     </Dialog>

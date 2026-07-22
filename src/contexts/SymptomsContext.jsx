@@ -1,31 +1,7 @@
-import { createContext, useContext, useMemo } from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-
-const STORAGE_KEY = 'pulso.symptoms';
-
-function createId() {
-  return typeof crypto !== 'undefined' && crypto.randomUUID
-    ? crypto.randomUUID()
-    : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function daysAgoISO(daysAgo, hour) {
-  const d = new Date();
-  d.setDate(d.getDate() - daysAgo);
-  d.setHours(hour, 0, 0, 0);
-  return d.toISOString();
-}
-
-function seedSymptoms() {
-  return [
-    { id: createId(), datetime: daysAgoISO(6, 9), description: 'Dolor de cabeza leve', intensity: 2 },
-    { id: createId(), datetime: daysAgoISO(5, 14), description: 'Náuseas después de comer', intensity: 3 },
-    { id: createId(), datetime: daysAgoISO(3, 8), description: 'Fatiga general', intensity: 4 },
-    { id: createId(), datetime: daysAgoISO(2, 20), description: 'Dolor articular', intensity: 3 },
-    { id: createId(), datetime: daysAgoISO(1, 11), description: 'Mareo leve', intensity: 2 },
-    { id: createId(), datetime: daysAgoISO(0, 7), description: 'Dolor de cabeza intenso', intensity: 5 },
-  ];
-}
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { getSymptoms, createSymptom } from '../api/symptoms';
+import { useAuth } from './AuthContext';
+import { useNotification } from './NotificationContext';
 
 function computeLast7Days(symptoms) {
   const days = [];
@@ -53,15 +29,39 @@ function computeLast7Days(symptoms) {
 const SymptomsContext = createContext(null);
 
 export function SymptomsProvider({ children }) {
-  const [symptoms, setSymptoms] = useLocalStorage(STORAGE_KEY, seedSymptoms);
+  const { isAuthenticated } = useAuth();
+  const { notifyError } = useNotification();
+  const [symptoms, setSymptoms] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const addSymptom = (entry) => {
-    setSymptoms((prev) => [...prev, { id: createId(), ...entry }]);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSymptoms([]);
+      return;
+    }
+
+    const to = new Date().toISOString().slice(0, 10);
+    const from = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    setLoading(true);
+    getSymptoms({ from, to, limit: 100 })
+      .then((res) => setSymptoms(res.data))
+      .catch((err) => notifyError(err.message || 'No se pudieron cargar los síntomas'))
+      .finally(() => setLoading(false));
+  }, [isAuthenticated, notifyError]);
+
+  const addSymptom = async (entry) => {
+    const created = await createSymptom(entry);
+    setSymptoms((prev) => [created, ...prev]);
+    return created;
   };
 
   const last7Days = useMemo(() => computeLast7Days(symptoms), [symptoms]);
 
-  const value = useMemo(() => ({ symptoms, addSymptom, last7Days }), [symptoms, last7Days]);
+  const value = useMemo(
+    () => ({ symptoms, addSymptom, last7Days, loading }),
+    [symptoms, last7Days, loading]
+  );
 
   return <SymptomsContext.Provider value={value}>{children}</SymptomsContext.Provider>;
 }
