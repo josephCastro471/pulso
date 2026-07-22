@@ -1,5 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { getSymptoms, createSymptom } from '../api/symptoms';
+import {
+  getSymptoms,
+  createSymptom,
+  updateSymptom as updateSymptomApi,
+  deleteSymptom as deleteSymptomApi,
+} from '../api/symptoms';
 import { useAuth } from './AuthContext';
 import { useNotification } from './NotificationContext';
 
@@ -41,11 +46,8 @@ export function SymptomsProvider({ children }) {
     }
     let ignore = false;
 
-    const to = new Date().toISOString().slice(0, 10);
-    const from = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-
     setLoading(true);
-    getSymptoms({ from, to, limit: 100 })
+    getSymptoms({ limit: 100 })
       .then((res) => { if (!ignore) setSymptoms(res.data); })
       .catch((err) => { if (!ignore) notifyError(err.message || 'No se pudieron cargar los síntomas'); })
       .finally(() => { if (!ignore) setLoading(false); });
@@ -59,10 +61,21 @@ export function SymptomsProvider({ children }) {
     return created;
   };
 
+  const updateSymptom = async (id, data) => {
+    const updated = await updateSymptomApi(id, data);
+    setSymptoms((prev) => prev.map((s) => (s.id === id ? updated : s)));
+    return updated;
+  };
+
+  const removeSymptom = async (id) => {
+    await deleteSymptomApi(id);
+    setSymptoms((prev) => prev.filter((s) => s.id !== id));
+  };
+
   const last7Days = useMemo(() => computeLast7Days(symptoms), [symptoms]);
 
   const value = useMemo(
-    () => ({ symptoms, addSymptom, last7Days, loading }),
+    () => ({ symptoms, addSymptom, updateSymptom, removeSymptom, last7Days, loading }),
     [symptoms, last7Days, loading]
   );
 
