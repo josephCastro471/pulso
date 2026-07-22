@@ -11,6 +11,7 @@ import AppointmentsList from '../components/dashboard/AppointmentsList';
 import AddRecordFab from '../components/dashboard/AddRecordFab';
 import SymptomFormModal from '../components/symptoms/SymptomFormModal';
 import MedicationFormModal from '../components/medications/MedicationFormModal';
+import AppointmentFormModal from '../components/appointments/AppointmentFormModal';
 import { useAuth } from '../contexts/AuthContext';
 import { useSymptoms } from '../contexts/SymptomsContext';
 import { useMedications } from '../contexts/MedicationsContext';
@@ -27,6 +28,7 @@ function formatNextAppointment(appt) {
 export default function Dashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [medicationModalOpen, setMedicationModalOpen] = useState(false);
+  const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
   const { user } = useAuth();
   const { symptoms, last7Days } = useSymptoms();
   const { todayAdherence } = useMedications();
@@ -92,11 +94,16 @@ export default function Dashboard() {
       <AddRecordFab
         onAddSymptom={() => setModalOpen(true)}
         onAddMedication={() => setMedicationModalOpen(true)}
+        onAddAppointment={() => setAppointmentModalOpen(true)}
       />
       <SymptomFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
       <MedicationFormModal
         open={medicationModalOpen}
         onClose={() => setMedicationModalOpen(false)}
+      />
+      <AppointmentFormModal
+        open={appointmentModalOpen}
+        onClose={() => setAppointmentModalOpen(false)}
       />
     </Box>
   );
