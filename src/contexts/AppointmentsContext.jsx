@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { getAppointments } from '../api/appointments';
+import { getAppointments, createAppointment } from '../api/appointments';
 import { useAuth } from './AuthContext';
 import { useNotification } from './NotificationContext';
 
@@ -32,8 +32,13 @@ export function AppointmentsProvider({ children }) {
     return future.length > 0 ? future[0] : null;
   }, [appointments]);
 
+  const addAppointment = async (data) => {
+    const created = await createAppointment(data);
+    setAppointments((prev) => [...prev, created]);
+  };
+
   const value = useMemo(
-    () => ({ appointments, nextAppointment, loading }),
+    () => ({ appointments, nextAppointment, addAppointment, loading }),
     [appointments, nextAppointment, loading]
   );
 
