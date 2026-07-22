@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { getMedications, getMedicationLogs, upsertMedicationLog } from '../api/medications';
+import { getMedications, getMedicationLogs, upsertMedicationLog, createMedication } from '../api/medications';
 import { useAuth } from './AuthContext';
 import { useNotification } from './NotificationContext';
 
@@ -53,6 +53,11 @@ export function MedicationsProvider({ children }) {
     }
   };
 
+  const addMedication = async (data) => {
+    const created = await createMedication(data);
+    setMedications((prev) => [...prev, { ...created, takenToday: false }]);
+  };
+
   const todayAdherence = useMemo(() => {
     if (medications.length === 0) return null;
     const takenCount = medications.filter((med) => med.takenToday).length;
@@ -60,7 +65,7 @@ export function MedicationsProvider({ children }) {
   }, [medications]);
 
   const value = useMemo(
-    () => ({ medications, toggleTaken, todayAdherence, loading }),
+    () => ({ medications, toggleTaken, addMedication, todayAdherence, loading }),
     [medications, todayAdherence, loading]
   );
 
