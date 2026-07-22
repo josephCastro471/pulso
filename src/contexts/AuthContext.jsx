@@ -16,18 +16,24 @@ export function AuthProvider({ children }) {
       return;
     }
 
+    let ignore = false;
+
     getMe()
       .then((me) => {
+        if (ignore) return;
         setUser(me);
         setToken(storedToken);
       })
       .catch(() => {
+        if (ignore) return;
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
         setUser(null);
         setToken(null);
       })
-      .finally(() => setLoading(false));
+      .finally(() => { if (!ignore) setLoading(false); });
+
+    return () => { ignore = true; };
   }, []);
 
   const login = async (email, password) => {

@@ -39,15 +39,18 @@ export function SymptomsProvider({ children }) {
       setSymptoms([]);
       return;
     }
+    let ignore = false;
 
     const to = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
     setLoading(true);
     getSymptoms({ from, to, limit: 100 })
-      .then((res) => setSymptoms(res.data))
-      .catch((err) => notifyError(err.message || 'No se pudieron cargar los síntomas'))
-      .finally(() => setLoading(false));
+      .then((res) => { if (!ignore) setSymptoms(res.data); })
+      .catch((err) => { if (!ignore) notifyError(err.message || 'No se pudieron cargar los síntomas'); })
+      .finally(() => { if (!ignore) setLoading(false); });
+
+    return () => { ignore = true; };
   }, [isAuthenticated, notifyError]);
 
   const addSymptom = async (entry) => {

@@ -20,10 +20,11 @@ export function MedicationsProvider({ children }) {
       setMedications([]);
       return;
     }
+    let ignore = false;
 
     const today = todayKey();
     setLoading(true);
-    getMedications()
+    getMedications({ limit: 100 })
       .then(async (res) => {
         const withLogs = await Promise.all(
           res.data.map(async (med) => {
@@ -32,10 +33,12 @@ export function MedicationsProvider({ children }) {
             return { ...med, takenToday };
           })
         );
-        setMedications(withLogs);
+        if (!ignore) setMedications(withLogs);
       })
-      .catch((err) => notifyError(err.message || 'No se pudieron cargar los medicamentos'))
-      .finally(() => setLoading(false));
+      .catch((err) => { if (!ignore) notifyError(err.message || 'No se pudieron cargar los medicamentos'); })
+      .finally(() => { if (!ignore) setLoading(false); });
+
+    return () => { ignore = true; };
   }, [isAuthenticated, notifyError]);
 
   const toggleTaken = async (id) => {
