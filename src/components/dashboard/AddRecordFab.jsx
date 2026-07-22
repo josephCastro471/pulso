@@ -5,16 +5,17 @@ import SpeedDialAction from '@mui/material/SpeedDialAction';
 const actions = [
   { key: 'sintoma', icon: '🩺', name: 'Síntoma', disabled: false },
   { key: 'medicamento', icon: '💊', name: 'Medicamento', disabled: false },
-  { key: 'cita', icon: '📅', name: 'Cita', disabled: true },
+  { key: 'cita', icon: '📅', name: 'Cita', disabled: false },
 ];
 
-export default function AddRecordFab({ onAddSymptom, onAddMedication }) {
+export default function AddRecordFab({ onAddSymptom, onAddMedication, onAddAppointment }) {
   const [open, setOpen] = useState(false);
 
   const handleActionClick = (key) => {
     setOpen(false);
     if (key === 'sintoma') onAddSymptom();
     if (key === 'medicamento') onAddMedication();
+    if (key === 'cita') onAddAppointment();
   };
 
   return (
