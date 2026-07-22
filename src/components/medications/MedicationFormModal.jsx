@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -8,33 +8,44 @@ import Button from '@mui/material/Button';
 import { useMedications } from '../../contexts/MedicationsContext';
 import { useNotification } from '../../contexts/NotificationContext';
 
-export default function MedicationFormModal({ open, onClose }) {
-  const { addMedication } = useMedications();
+export default function MedicationFormModal({ open, onClose, editItem = null }) {
+  const { addMedication, updateMedication } = useMedications();
   const { notifyError } = useNotification();
   const [name, setName] = useState('');
   const [dosage, setDosage] = useState('');
   const [frequency, setFrequency] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const isValid = name.trim().length > 0 && dosage.trim().length > 0 && frequency.trim().length > 0;
+  useEffect(() => {
+    if (!open) return;
+    if (editItem) {
+      setName(editItem.name);
+      setDosage(editItem.dosage);
+      setFrequency(editItem.frequency);
+    } else {
+      setName('');
+      setDosage('');
+      setFrequency('');
+    }
+  }, [open, editItem]);
 
-  const handleClose = () => {
-    setName('');
-    setDosage('');
-    setFrequency('');
-    onClose();
-  };
+  const isValid = name.trim().length > 0 && dosage.trim().length > 0 && frequency.trim().length > 0;
 
   const handleSave = async () => {
     if (!isValid) return;
     setSaving(true);
     try {
-      await addMedication({
+      const payload = {
         name: name.trim(),
         dosage: dosage.trim(),
         frequency: frequency.trim(),
-      });
-      handleClose();
+      };
+      if (editItem) {
+        await updateMedication(editItem.id, payload);
+      } else {
+        await addMedication(payload);
+      }
+      onClose();
     } catch (err) {
       notifyError(err.message || 'No se pudo guardar el medicamento');
     } finally {
@@ -43,8 +54,8 @@ export default function MedicationFormModal({ open, onClose }) {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle>Registrar medicamento</DialogTitle>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{editItem ? 'Editar medicamento' : 'Registrar medicamento'}</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
         <TextField
           label="Nombre"
@@ -71,9 +82,9 @@ export default function MedicationFormModal({ open, onClose }) {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancelar</Button>
+        <Button onClick={onClose}>Cancelar</Button>
         <Button onClick={handleSave} variant="contained" disabled={!isValid || saving}>
-          {saving ? 'Guardando...' : 'Guardar'}
+          {saving ? 'Guardando...' : editItem ? 'Guardar cambios' : 'Guardar'}
         </Button>
       </DialogActions>
     </Dialog>
