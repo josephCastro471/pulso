@@ -71,6 +71,7 @@ export default function Register() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              helperText="La contraseña debe tener al menos 8 caracteres"
               fullWidth
               required
             />
