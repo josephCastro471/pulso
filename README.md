@@ -1,16 +1,45 @@
-# React + Vite
+# Pulso
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Asistente de salud personalizado para gestionar síntomas, medicamentos y citas médicas, con dashboard interactivo.
 
-Currently, two official plugins are available:
+**Demo en vivo:** https://pulso-olive-beta.vercel.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Funcionalidades
 
-## React Compiler
+- Registro y seguimiento de síntomas.
+- Gestión de medicamentos (dosis, recordatorios).
+- Agenda de citas médicas.
+- Dashboard con gráficas de evolución en tiempo real (Recharts).
+- Autenticación con JWT y CRUD completo sobre todos los recursos.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Stack
 
-## Expanding the Oxlint configuration
+**Frontend:** React · Vite · MUI · Recharts
+**Backend:** Node.js · Express · JWT
+**Base de datos:** PostgreSQL · Prisma
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Arquitectura
+
+Proyecto full-stack, cliente y servidor en el mismo repo:
+
+- `src/` — frontend (React + Vite)
+- `server/` — backend (Node.js + Express + Prisma)
+
+## Correr en local
+
+```bash
+# Cliente
+npm install
+npm run dev
+
+# Servidor (en otra terminal)
+cd server
+npm install
+npm run dev
+```
+
+Necesitas una instancia de PostgreSQL y las variables de entorno correspondientes configuradas en `server/` (cadena de conexión, secreto de JWT).
+
+## Motivación
+
+Inspirado en el sistema de gestión médica que desarrollé en producción para JucaCoop Solutions (cliente Ceragem) — esta es mi versión personal, construida desde cero, para seguir practicando el mismo dominio (salud) con mi stack principal. Parte del portafolio en https://portafolio-chi-two-81.vercel.app/
